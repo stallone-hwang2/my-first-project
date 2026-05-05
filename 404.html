@@ -4,12 +4,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Test1</title>
+    <title>MyFcmApp</title>
     <base href="/my-first-project/" />
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="Test1.styles.css" rel="stylesheet" />
+    <link href="MyFcmApp.styles.css" rel="stylesheet" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
 </head>
 
 <body>
@@ -27,6 +30,40 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+
+<script>
+    // 初始化
+    firebase.initializeApp({
+        apiKey: "AIzaSyBjzRu6d87W9LjPhqkoo3JVVeGNyB8fnB0",
+        projectId: "blazorwasmtest1",
+        messagingSenderId: "692860921646",
+        appId: "1:692860921646:web:4ba593d1f24ca9ee69fcbf"
+    });
+
+    const messaging = firebase.messaging();
+
+    // 供 Blazor 調用的 JS 函式
+    window.getFcmToken = async (vapidKey) => {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                return await messaging.getToken({ vapidKey: vapidKey });
+            } else {
+                console.warn("通知權限被拒絕");
+                return null;
+            }
+        } catch (error) {
+            console.error("獲取 Token 失敗:", error);
+            return null;
+        }
+    };
+</script>
+    
 </body>
 
 </html>
