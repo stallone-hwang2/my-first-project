@@ -38,14 +38,18 @@
 
 
 <script>
-const basePath = '/my-first-project/'; // 例如 '/MyFcmApp/'
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register(`${basePath}firebase-messaging-sw.js`)
-    .then(function(registration) {
-        console.log('Service Worker 註冊成功，範圍為:', registration.scope);
-    });
-}
+const repoPath = '/my-first-project/';
 
+    if ('serviceWorker' in navigator) {
+        // 1. 註冊 Blazor PWA 原有的 Service Worker
+        navigator.serviceWorker.register(`${repoPath}service-worker.js`);
+
+        // 2. 註冊 Firebase Messaging Service Worker
+        // 注意：確保檔案名稱完全一致（包含大小寫）
+        navigator.serviceWorker.register(`${repoPath}firebase-messaging-sw.js`)
+            .then(reg => console.log('FCM SW 註冊成功:', reg.scope))
+            .catch(err => console.error('FCM SW 註冊失敗:', err));
+    }
 
     // 初始化
     firebase.initializeApp({
