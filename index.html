@@ -33,25 +33,18 @@
     <script>navigator.serviceWorker.register('service-worker.js');</script>
 
     <!-- Firebase SDK -->
+ 
+    
+    
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 
 
 <script>
-const repoPath = '/my-first-project/';
+    // 1. 定義路徑變數（必須與你的 GitHub 專案名稱一致）
+    const repoPath = '/my-first-project/';
 
-    if ('serviceWorker' in navigator) {
-        // 1. 註冊 Blazor PWA 原有的 Service Worker
-        navigator.serviceWorker.register(`${repoPath}service-worker.js`);
-
-        // 2. 註冊 Firebase Messaging Service Worker
-        // 注意：確保檔案名稱完全一致（包含大小寫）
-        navigator.serviceWorker.register(`${repoPath}firebase-messaging-sw.js`)
-            .then(reg => console.log('FCM SW 註冊成功:', reg.scope))
-            .catch(err => console.error('FCM SW 註冊失敗:', err));
-    }
-
-    // 初始化
+    // 初始化 Firebase
     firebase.initializeApp({
         apiKey: "AIzaSyBjzRu6d87W9LjPhqkoo3JVVeGNyB8fnB0",
         projectId: "blazorwasmtest1",
@@ -61,18 +54,25 @@ const repoPath = '/my-first-project/';
 
     const messaging = firebase.messaging();
 
-    // 供 Blazor 調用的 JS 函式
+    // 2. 核心函式：手動註冊 SW 並獲取 Token
     window.getFcmToken = async (vapidKey) => {
         try {
             const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                return await messaging.getToken({ vapidKey: vapidKey });
-            } else {
-                console.warn("通知權限被拒絕");
-                return null;
-            }
+            if (permission !== 'granted') return null;
+
+            // 重要：手動指定子目錄路徑註冊 SW
+            const swUrl = `${repoPath}firebase-messaging-sw.js`;
+            const registration = await navigator.serviceWorker.register(swUrl, {
+                scope: repoPath
+            });
+
+            // 重要：強制 Firebase 使用這個已註冊的 SW
+            return await messaging.getToken({ 
+                vapidKey: vapidKey,
+                serviceWorkerRegistration: registration 
+            });
         } catch (error) {
-            console.error("獲取 Token 失敗:", error);
+            console.error("FCM Token 獲取失敗:", error);
             return null;
         }
     };
