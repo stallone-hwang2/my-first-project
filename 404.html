@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebTV_KND</title>
-    <base href="/my-first-project/" />
+    <title>WebWHDemo5</title>
+    <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="WebTV_KND.styles.css" rel="stylesheet" />
+    <link href="WebWHDemo5.styles.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -27,9 +27,19 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script src="js/chart.umd.js"></script>
-    <script src="js/chartjs-plugin-datalabels.min.js"></script>
-    <script src="_content/BlazorExpress.ChartJS/blazorexpress.chartjs.js"></script>
+    <script>
+        // whSvgRect：取得 <svg id="whSvg"> 在瀏覽器視窗中的實際位置與大小。
+        // C# 端（Index.razor 的 RefreshSvgRectAsync）需要它來做兩件事：
+        //   1. 把滑鼠「螢幕像素座標」換算成「viewBox 單位」，以便拖曳平移 / 滾輪縮放
+        //   2. 處理 preserveAspectRatio 造成的留白，縮放中心才不會偏移
+        // 回傳物件的屬性名稱 X / Y / W / H 對應 C# 的 SvgRect record。
+        window.whSvgRect = function (id) {
+            var el = document.getElementById(id);
+            if (!el) return { X: 0, Y: 0, W: 0, H: 0 };
+            var r = el.getBoundingClientRect();
+            return { X: r.left, Y: r.top, W: r.width, H: r.height };
+        };
+    </script>
 </body>
 
 </html>

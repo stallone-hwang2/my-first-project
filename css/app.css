@@ -2,11 +2,6 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.blank-layout {
-    width: 100%;
-    overflow-x: hidden;
-}
-
 h1:focus {
     outline: none;
 }
@@ -105,4 +100,359 @@ a, .btn-link {
 
 code {
     color: #c02d76;
+}
+
+/* ============================================================
+   開放式倉儲貨架 3D 位置管理（Pages/Index.razor）
+   ============================================================ */
+
+/* 整體版面：左側 SVG 視圖 + 右側資料面板 */
+.wh-layout {
+    display: flex;
+    gap: 14px;
+    height: calc(100vh - 5.8rem);
+    min-height: 540px;
+}
+
+/* ---- 左側畫布 ---- */
+.wh-canvas {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: radial-gradient(1200px 600px at 50% 20%, #3a4a60, #222c3b 70%);
+    border: 1px solid #4a5a70;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 工具列 */
+.wh-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid #4a5a70;
+}
+
+.wh-search-input {
+    flex: 1 1 220px;
+    max-width: 330px;
+    padding: 7px 12px;
+    border: 1px solid #5a6c84;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 0.95rem;
+}
+
+.wh-toolbar-sep {
+    width: 1px;
+    height: 26px;
+    background: #4a5a70;
+    margin: 0 4px;
+}
+
+.wh-btn {
+    padding: 7px 14px;
+    border: 1px solid #5a6c84;
+    border-radius: 6px;
+    background: #33445c;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+
+.wh-btn:hover {
+    background: #43597a;
+}
+
+.wh-btn-search {
+    background: #1b6ec2;
+    border-color: #258cfb;
+}
+
+.wh-btn-search:hover {
+    background: #258cfb;
+}
+
+/* SVG 視圖區 */
+.wh-svg-wrap {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 0;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.wh-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+}
+
+.wh-svg-wrap.wh-panning .wh-svg,
+.wh-svg:active {
+    cursor: grabbing;
+}
+
+.wh-hint {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+}
+
+/* 圖例 */
+.wh-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid #4a5a70;
+    font-size: 0.85rem;
+    color: #dfe6ef;
+}
+
+.wh-legend-title {
+    font-weight: 600;
+}
+
+.wh-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wh-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.wh-dot-available { background: #EFDFB6; }
+.wh-dot-warning   { background: #F59E2E; }
+.wh-dot-error     { background: #E0443F; }
+
+/* ---- SVG 內容樣式 ---- */
+.wh-rack-label {
+    fill: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    paint-order: stroke;
+    stroke: rgba(0, 0, 0, 0.55);
+    stroke-width: 3px;
+}
+
+.wh-level-label {
+    fill: #cfe0f2;
+    font-size: 11px;
+    font-weight: 600;
+    paint-order: stroke;
+    stroke: rgba(0, 0, 0, 0.6);
+    stroke-width: 2.5px;
+}
+
+.wh-bin {
+    cursor: pointer;
+}
+
+.wh-bin polygon {
+    stroke: rgba(0, 0, 0, 0.35);
+    stroke-width: 0.5;
+}
+
+.wh-bin:hover polygon {
+    stroke: #ffffff;
+    stroke-width: 1;
+}
+
+/* 搜尋命中：黃色貨箱 + 紅色光暈 + 持續閃爍（需求 9） */
+.wh-bin-highlight {
+    animation: wh-blink 0.85s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.95)) drop-shadow(0 0 16px rgba(255, 0, 0, 0.6));
+}
+
+@keyframes wh-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+/* 點選的儲位：上表面加上白色虛線框 */
+.wh-bin-selected .wh-face-top {
+    stroke: #ffffff;
+    stroke-width: 1.6;
+    stroke-dasharray: 5 3;
+}
+
+.wh-bin-label {
+    fill: #20242a;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: rgba(255, 255, 255, 0.75);
+    stroke-width: 1.5px;
+}
+
+/* ---- 右側面板 ---- */
+.wh-side {
+    flex: 0 0 330px;
+    width: 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.wh-error {
+    background: #fdecea;
+    border: 1px solid #f5c6c2;
+    color: #b02a20;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.wh-panel {
+    background: #ffffff;
+    border: 1px solid #d8dee6;
+    border-radius: 8px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.wh-panel h3 {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eef1f5;
+    font-size: 1rem;
+    color: #23303f;
+}
+
+.wh-hint-text {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    color: #6b7684;
+}
+
+/* 搜尋結果清單 */
+.wh-result-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.wh-result-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #e3e8ee;
+    border-radius: 6px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.wh-result-item:hover {
+    background: #eef3f8;
+}
+
+.wh-result-active {
+    border-color: #1b6ec2;
+    background: #e8f1fb;
+}
+
+.wh-result-id {
+    color: #1b6ec2;
+    font-family: Consolas, monospace;
+    font-weight: 700;
+}
+
+.wh-result-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #3d4a5a;
+    font-size: 0.85rem;
+}
+
+.wh-status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.wh-status-available { background: #C4A97A; }
+.wh-status-warning   { background: #F59E2E; }
+.wh-status-error     { background: #E0443F; }
+
+/* 儲位詳細資料 */
+.wh-detail-grid {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    row-gap: 8px;
+    column-gap: 10px;
+    font-size: 0.9rem;
+}
+
+.wh-detail-label {
+    color: #6b7684;
+}
+
+.wh-detail-value {
+    font-weight: 600;
+    color: #23303f;
+}
+
+.wh-detail-bin {
+    color: #1b6ec2;
+    font-family: Consolas, monospace;
+}
+
+.wh-empty {
+    color: #6b7684;
+    font-size: 0.9rem;
+}
+
+.wh-empty p {
+    margin: 0;
+}
+
+/* 窄螢幕時改為上下排列 */
+@media (max-width: 900px) {
+    .wh-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .wh-canvas {
+        min-height: 480px;
+    }
+
+    .wh-side {
+        flex: none;
+        width: 100%;
+    }
 }

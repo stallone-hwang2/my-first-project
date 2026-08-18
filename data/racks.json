@@ -1,0 +1,34 @@
+[
+  {
+    "rackId": "A1",
+    "gridX": 0,
+    "gridY": 0,
+    "levels": 5,
+    "positionsPerLevel": 6,
+    "rackType": "高層貨架"
+  },
+  {
+    "rackId": "B1",
+    "gridX": 12,
+    "gridY": 2,
+    "levels": 5,
+    "positionsPerLevel": 6,
+    "rackType": "標準貨架"
+  },
+  {
+    "rackId": "C1",
+    "gridX": 24,
+    "gridY": 4,
+    "levels": 5,
+    "positionsPerLevel": 6,
+    "rackType": "高層貨架"
+  },
+  {
+    "rackId": "D1",
+    "gridX": 36,
+    "gridY": 6,
+    "levels": 5,
+    "positionsPerLevel": 6,
+    "rackType": "標準貨架"
+  }
+]
